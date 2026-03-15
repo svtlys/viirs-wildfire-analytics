@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-file_path = "DL_FIRE_J1V-C2_725729/fire_nrt_J1V-C2_725729.csv"
+file_path = "data/fire_nrt_J1V-C2_725729.csv"
 
 df = pd.read_csv(file_path)
 
