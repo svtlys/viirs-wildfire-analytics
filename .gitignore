@@ -1,3 +1,3 @@
-data/raw/*.csv
-.ipynb_checkpoints/
-.DS_Store
+data/fire_nrt_J1V-C2_725729.csv
+fire_archive_J1V-C2_726206.csv
+.gitignore
