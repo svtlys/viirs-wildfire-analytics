@@ -10,10 +10,9 @@ df = pd.read_csv(file_path)
 # This file is intended to understand the dataset data and clean data
 # Note that there are no nulls and that the dataset is already quite clean 
 
-# ----------------------------
+# -----------------------------
 # Basic Overview
-# ----------------------------
-
+# -----------------------------
 print("\nFirst 5 rows:")
 print(df.head())
 
@@ -26,9 +25,9 @@ print(df.columns)
 print("\nData types:")
 print(df.dtypes)
 
-# ----------------------------
+# -----------------------------
 # Check for null values 
-# ----------------------------
+# -----------------------------
 
 # Note that this dataset doesn't have any null values 
 print("\nMissing values:")
@@ -36,9 +35,9 @@ print(df.isnull().sum())
 
 
 
-# ----------------------------
+# -----------------------------
 # 4. Quick Statistical Summary
-# ----------------------------
+# -----------------------------
 
 print("\nSummary statistics (numeric columns):")
 print(df.describe())
