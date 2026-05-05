@@ -556,5 +556,5 @@ with tab_insights:
 # Footer
 # ================================
 st.caption(
-    "Enhanced models only. Predictions are shown in both log(FRP) and converted original FRP."
+    "Enhanced models only. Predictions are shown in log(FRP)."
 )
