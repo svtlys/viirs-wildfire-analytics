@@ -224,6 +224,76 @@ def plot_shap_local_and_global(model, X, idx, shap_model_choice, plot_type):
 
         st.pyplot(fig, clear_figure=True)
 
+# ================================
+# Insight Plot Functions
+# ================================
+def build_error_dataframe(preds_df, model_choice, X_test):
+    """Create dataframe with features, actual log(FRP), predicted log(FRP), and error."""
+    model_key = MODEL_OPTIONS[model_choice]["key"]
+
+    actual_col = f"{model_key}_frp"
+    pred_col = f"{model_key}_predict_frp"
+
+    if actual_col not in preds_df.columns or pred_col not in preds_df.columns:
+        raise ValueError("Actual or predicted FRP columns not found.")
+
+    df_plot = prepare_features(X_test).copy()
+
+    df_plot["actual_frp"] = preds_df[actual_col].values
+    df_plot["predicted_frp"] = preds_df[pred_col].values
+
+    df_plot["actual_log_frp"] = np.log1p(df_plot["actual_frp"])
+    df_plot["predicted_log_frp"] = np.log1p(df_plot["predicted_frp"].clip(lower=0))
+
+    df_plot["error_log"] = df_plot["actual_log_frp"] - df_plot["predicted_log_frp"]
+    df_plot["abs_error_log"] = df_plot["error_log"].abs()
+
+    return df_plot
+
+
+def plot_error_vs_feature(df_plot, feature):
+    """Scatter plot showing prediction error against a selected feature."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    ax.scatter(df_plot[feature], df_plot["error_log"], alpha=0.35)
+    ax.axhline(0, linestyle="--", linewidth=1)
+
+    ax.set_xlabel(feature)
+    ax.set_ylabel("Log Error: Actual log(FRP) - Predicted log(FRP)")
+    ax.set_title(f"Prediction Error vs {feature}")
+
+    st.pyplot(fig, clear_figure=True)
+
+
+def plot_error_distribution_by_group(df_plot, group_feature):
+    """Boxplot showing how error changes across groups."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    groups = sorted(df_plot[group_feature].dropna().unique())
+    data = [df_plot[df_plot[group_feature] == g]["error_log"] for g in groups]
+
+    ax.boxplot(data, labels=groups)
+    ax.axhline(0, linestyle="--", linewidth=1)
+
+    ax.set_xlabel(group_feature)
+    ax.set_ylabel("Log Error")
+    ax.set_title(f"Error Distribution by {group_feature}")
+
+    st.pyplot(fig, clear_figure=True)
+
+
+def plot_feature_vs_target(df_plot, feature):
+    """Scatter plot showing relationship between a feature and actual log(FRP)."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    ax.scatter(df_plot[feature], df_plot["actual_log_frp"], alpha=0.35)
+
+    ax.set_xlabel(feature)
+    ax.set_ylabel("Actual log(FRP)")
+    ax.set_title(f"{feature} vs Actual log(FRP)")
+
+    st.pyplot(fig, clear_figure=True)
+
 
 # ================================
 # Load Data
@@ -261,9 +331,10 @@ st.info(
 # ================================
 # Tabs
 # ================================
-tab_pred, tab_shap = st.tabs([
+tab_pred, tab_shap, tab_insights = st.tabs([
     "Prediction",
-    "SHAP Explainability"
+    "SHAP Explainability",
+    "Model Insights"
 ])
 
 
@@ -413,7 +484,73 @@ with tab_shap:
                 except Exception as e:
                     st.error("SHAP failed for this model.")
                     st.exception(e)
+# ================================
+# Model Insights Tab
+# ================================
+with tab_insights:
+    st.subheader("Model Insight Settings")
 
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        insight_model_choice = st.selectbox(
+            "Select enhanced model",
+            list(MODEL_OPTIONS.keys()),
+            key="insight_model"
+        )
+
+    with c2:
+        numeric_features = [
+            "brightness", "bright_t31", "scan", "track",
+            "acq_time", "month", "confidence"
+        ]
+
+        error_feature = st.selectbox(
+            "Error vs feature",
+            numeric_features,
+            key="error_feature"
+        )
+
+    with c3:
+        group_feature = st.selectbox(
+            "Error group",
+            ["is_day", "month", "confidence", "type"],
+            key="group_feature"
+        )
+
+    df_plot = build_error_dataframe(
+        enhanced_preds_df,
+        insight_model_choice,
+        X_test
+    )
+
+    st.caption(
+        "These plots use log(FRP) error because enhanced models were trained in log(FRP) space."
+    )
+
+    st.divider()
+
+    left, right = st.columns(2)
+
+    with left:
+        st.subheader("Error vs Feature")
+        plot_error_vs_feature(df_plot, error_feature)
+
+    with right:
+        st.subheader("Error Distribution by Group")
+        plot_error_distribution_by_group(df_plot, group_feature)
+
+    st.divider()
+
+    st.subheader("Feature vs Target")
+
+    target_feature = st.selectbox(
+        "Select feature for target relationship",
+        numeric_features,
+        key="target_feature"
+    )
+
+    plot_feature_vs_target(df_plot, target_feature)
 
 # ================================
 # Footer
