@@ -1,5 +1,8 @@
 .DS_Store
 data/*.csv
 .ipynb_checkpoints/
-stratified_sample.csvstratified_sample/*.csv
+stratified_sample.csv
+stratified_sample/*.csv
 enhanced_models/data/*.csv
+baseline/models/
+enhanced_models/models/
