@@ -1,6 +1,6 @@
 # 🔥 VIIRS Wildfire Analytics Project
 
-## 📌 Project Overview
+## Project Overview
 
 This project analyzes global wildfire activity using NASA VIIRS satellite data from 2024–2025. Our goal is to identify spatial and temporal wildfire patterns and explore how well machine learning models can predict wildfire occurrences.
 
@@ -8,7 +8,7 @@ We combine GPU-accelerated data processing (RAPIDS), exploratory data analysis (
 
 ---
 
-## ❓ Research Question
+## Research Question
 
 **What wildfire patterns can be identified from VIIRS satellite data between 2024 and 2025, and how well can a machine learning model trained on historical data predict wildfire occurrences compared to actual events in 2025?**
 
@@ -20,21 +20,14 @@ We combine GPU-accelerated data processing (RAPIDS), exploratory data analysis (
 * **Time Range:** 2024–2025  
 * **Size:** ~22 million records  
 
-### 📥 Access Instructions
+### Access Instructions
 
-The dataset is hosted externally due to its size:  
+The dataset was downloaded from the source and sampled. All intermediary data is stored externally on Google Drive due to its size:  
 👉 https://drive.google.com/file/d/17lHVkabbMYZ8FH9FFHpUXV9TBRMjlCPW/view?usp=sharing  
 
 **Steps:**
 1. Download the dataset  
 2. Place it inside the `data/` folder in this repository  
-
-### Key Features
-
-* `acq_date` – Date of fire detection  
-* `latitude`, `longitude` – Geographic location  
-* `frp` – Fire Radiative Power (intensity)  
-* `confidence` – Detection confidence (low, nominal, high)  
 
 ---
 
@@ -99,7 +92,7 @@ There is no strong linear correlation between features and FRP.
 This limits model performance and suggests complex, non-linear relationships.  
 
 ### 3. Data Ambiguity
-Certain fire classes (especially low and extreme values) show high variability and outliers.  
+Error distributions of fire classes show high variability and outliers.  
 This ambiguity contributes to model error and reflects limitations in the dataset.  
 
 ### 4. Target Transformation Matters
@@ -113,8 +106,8 @@ This indicates the original target distribution is highly skewed and benefits fr
 ### 📁 Project Structure
 
 * `baseline/` → Baseline modeling (minimal feature engineering)  
-* `enhanced/` → Models with feature engineering applied  
-* `pca/` → PCA exploration conducted prior to modeling  
+* `enhanced_models/` → Models with feature engineering applied  
+* `PCA/` → PCA exploration conducted prior to modeling  
 
 ---
 
@@ -154,6 +147,6 @@ We developed **four dashboards using different tools**:
 
 * **Streamlit** – Lightweight interactive app  
 
-All dashboard implementations can be found in the `dashboard/` folder.
+All dashboard implementations can be found in the `dashboards/` folder.
 
 ---
