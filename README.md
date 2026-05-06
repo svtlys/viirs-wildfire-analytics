@@ -16,28 +16,25 @@ We combine GPU-accelerated data processing (RAPIDS), exploratory data analysis (
 
 ## 📊 Dataset
 
-* **Source:** NASA VIIRS (Visible Infrared Imaging Radiometer Suite)
-* **Time Range:** 2024–2025
-* **Size:** ~22 million records 
-* **Key Features:**
+* **Source:** NASA VIIRS (Visible Infrared Imaging Radiometer Suite)  
+* **Time Range:** 2024–2025  
+* **Size:** ~22 million records  
 
-  * `acq_date` – Date of fire detection
-  * `latitude`, `longitude` – Geographic location
-  * `frp` – Fire Radiative Power (intensity)
-  * `confidence` – Detection confidence (low, nominal, high)
+### 📥 Access Instructions
 
-### Why This Dataset?
+The dataset is hosted externally due to its size:  
+👉 https://drive.google.com/file/d/17lHVkabbMYZ8FH9FFHpUXV9TBRMjlCPW/view?usp=sharing  
 
-* Real-world, large-scale satellite data
-* High volume enables meaningful pattern detection
-* Rich features allow both EDA and machine learning applications
-* Relevant to climate and environmental monitoring
+**Steps:**
+1. Download the dataset  
+2. Place it inside the `data/` folder in this repository  
 
-### Dataset Complexity
+### Key Features
 
-* Large size required GPU acceleration
-* Temporal and spatial preprocessing needed
-* Noise reduction required (confidence filtering)
+* `acq_date` – Date of fire detection  
+* `latitude`, `longitude` – Geographic location  
+* `frp` – Fire Radiative Power (intensity)  
+* `confidence` – Detection confidence (low, nominal, high)  
 
 ---
 
@@ -47,32 +44,32 @@ We used NVIDIA RAPIDS to accelerate data processing on the GPU.
 
 ### Key Steps
 
-* Converted data into GPU DataFrames (cuDF)
-* Parsed and transformed date fields
-* Created a **"period" feature** (bi-monthly seasonal grouping)
-* Filtered dataset to include **nominal and high-confidence fires only**
-* Performed large-scale aggregations (groupby operations)
+* Converted data into GPU DataFrames (cuDF)  
+* Parsed and transformed date fields  
+* Created a **"period" feature** (bi-monthly seasonal grouping)  
+* Filtered dataset to include **nominal and high-confidence fires only**  
+* Performed large-scale aggregations (groupby operations)  
 
 ### Why RAPIDS?
 
-* Significantly faster than CPU-based pandas
-* Enabled processing of tens of millions of rows efficiently
-* Reduced runtime from seconds/minutes to milliseconds for key operations
+* Significantly faster than CPU-based pandas  
+* Enabled processing of tens of millions of rows efficiently  
+* Reduced runtime from seconds/minutes to milliseconds for key operations  
 
 ---
 
 ## 🧹 Data Cleaning & Preparation
 
-* Removed low-confidence detections to reduce noise
-* Converted date fields into datetime format
-* Engineered time-based features (month, seasonal period)
-* Aggregated spatial data into latitude/longitude bins
+* Removed low-confidence detections to reduce noise  
+* Converted date fields into datetime format  
+* Engineered time-based features (month, seasonal period)  
+* Aggregated spatial data into latitude/longitude bins  
 
 ### Challenges
 
-* Handling large dataset size without crashing sessions
-* GPU memory limitations
-* Ensuring consistency when converting between cuDF and pandas
+* Handling large dataset size without crashing sessions  
+* GPU memory limitations  
+* Ensuring consistency when converting between cuDF and pandas  
 
 ---
 
@@ -82,58 +79,81 @@ We created multiple visualizations to explore wildfire behavior.
 
 ### Key Visualizations
 
-* Global wildfire hotspot map
-* Fire detections over time (trend analysis)
-* Seasonal wildfire activity (period-based bar chart)
-* Fire intensity (FRP) distribution
-* Spatial density heatmap
-* Confidence vs. fire occurrence
-
-### Key Insights
-
-* Wildfires show strong seasonal patterns
-* Certain regions exhibit consistently high fire activity
-* Fire intensity varies significantly across time periods
-* High-confidence fires provide cleaner analytical signals
+* Global wildfire hotspot map  
+* Fire detections over time (trend analysis)  
+* Seasonal wildfire activity (period-based bar chart)  
+* Fire intensity (FRP) distribution  
+* Spatial density heatmap  
+* Confidence vs. fire occurrence  
 
 ---
 
-## 🤖 Preliminary Machine Learning Direction
+## 🔍 Key Insights
 
-* **Task Type:** Classification or regression
-* **Goal:** Predict wildfire occurrence or intensity
+### 1. Granularity Matters
+Monthly aggregation is insufficient to capture wildfire trends.  
+Daily-level data reveals meaningful variation that is otherwise lost.  
 
-### Justification
+### 2. Weak Feature Correlation
+There is no strong linear correlation between features and FRP.  
+This limits model performance and suggests complex, non-linear relationships.  
 
-* Strong temporal and seasonal trends observed in EDA
-* Spatial clustering suggests predictive geographic patterns
-* Cleaned dataset supports supervised learning
+### 3. Data Ambiguity
+Certain fire classes (especially low and extreme values) show high variability and outliers.  
+This ambiguity contributes to model error and reflects limitations in the dataset.  
+
+### 4. Target Transformation Matters
+Log transformation of FRP significantly improves model performance, especially for simpler models like linear regression.  
+This indicates the original target distribution is highly skewed and benefits from normalization.  
+
+---
+
+## 🤖 Modeling
+
+### 📁 Project Structure
+
+* `baseline/` → Baseline modeling (minimal feature engineering)  
+* `enhanced/` → Models with feature engineering applied  
+* `pca/` → PCA exploration conducted prior to modeling  
+
+---
+
+### ⚙️ Modeling Strategy
+
+**Feature Engineering**
+* Log transform FRP (handle skew)  
+* Extract month (capture seasonality)  
+* Encode categorical variables  
+* Remove low-value features  
+
+**Objective**
+* Evaluate impact of:
+  * Feature engineering  
+  * Model complexity  
+  * Hyperparameter tuning  
+
+**Modeling Approach**
+* Compare baseline vs enhanced models  
+* Linear vs tree-based methods  
+* Apply Grid Search for tuning  
+* Use PCA in selected pipelines  
+* Stratified train-test split to preserve target distribution  
 
 ---
 
 ## 📊 Dashboards
 
-We developed **two dashboards using different tools**:
+We developed **four dashboards using different tools**:
 
-### 1. Plotly Dash Dashboard
+* **Tableau** – Visual analytics & correlations  
+  👉 https://public.tableau.com/app/profile/angela.wei/viz/WildfireHotspotTemperatureandBrightnessDistributions/Dashboard  
 
-* Focus: Spatial & Temporal Analysis
-* Features:
+* **Plotly Dash** – Interactive spatial & temporal analysis  
 
-  * Interactive wildfire hotspot map
-  * Time-series trends
-  * Seasonal filtering
-  * Dynamic user interaction
+* **Power BI** – Business-style reporting dashboard  
 
-### 2. Tableau Dashboard
+* **Streamlit** – Lightweight interactive app  
 
-* Focus: Fire Intensity Analysis
-* Features:
-
-  * FRP distribution
-  * Correlation visualizations
-  * Comparative analysis across features
-  * Dashboard: https://public.tableau.com/app/profile/angela.wei/viz/WildfireHotspotTemperatureandBrightnessDistributions/Dashboard 
+All dashboard implementations can be found in the `dashboard/` folder.
 
 ---
-
